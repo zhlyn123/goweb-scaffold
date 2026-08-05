@@ -5,10 +5,12 @@ import (
 	"fmt"
 
 	"goweb-scaffold/internal/app/lifecycle"
+	"goweb-scaffold/internal/platform/config"
 )
 
 // Application 负责应用最外层的启动和关闭流程。
 type Application struct {
+	config    *config.Config
 	lifecycle *lifecycle.Manager
 }
 
@@ -16,8 +18,9 @@ type Application struct {
 //
 // 第一阶段刻意保持简单。后续阶段会在这里注册配置、日志、数据库、
 // 缓存、HTTP 服务、指标监控和业务模块路由。
-func NewApplication() *Application {
+func NewApplication(config *config.Config) *Application {
 	return &Application{
+		config:    config,
 		lifecycle: lifecycle.NewManager(),
 	}
 }
