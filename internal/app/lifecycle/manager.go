@@ -48,8 +48,6 @@ func (m *Manager) Start(ctx context.Context) error {
 	return nil
 }
 
-
-
 // Stop 按相反顺序关闭所有已启动的钩子。
 func (m *Manager) Stop(ctx context.Context) error {
 	var errs []error
