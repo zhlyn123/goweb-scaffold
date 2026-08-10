@@ -8,8 +8,26 @@ http:
   write_timeout: 10s
   shutdown_timeout: 10s
 
-
 log:
   level: debug
   format: console
 
+cors:
+  allow_origins:
+    - "http://localhost:5173"
+    - "http://localhost:8080"
+  allow_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allow_headers:
+    - "Origin"
+    - "Content-Type"
+    - "Authorization"
+    - "X-Request-ID"
+  expose_headers:
+    - "X-Request-ID"
+  allow_credentials: true
+  max_age: 12h

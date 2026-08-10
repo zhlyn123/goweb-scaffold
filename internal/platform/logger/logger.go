@@ -34,7 +34,7 @@ func parseLevel(level string) (zapcore.Level, error) {
 	return zapLevel, nil
 }
 
-//buildZapConfig 根据应用配置构造zap配置
+// buildZapConfig 根据应用配置构造zap配置
 func buildZapConfig(cfg config.LogConfig, level zapcore.Level) zap.Config {
 	if cfg.Format == "json" {
 		zapCfg := zap.NewProductionConfig()

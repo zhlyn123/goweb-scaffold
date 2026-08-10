@@ -46,4 +46,24 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("log.level", "debug")
 	v.SetDefault("log.format", "console")
+
+	v.SetDefault("cors.allow_origins", []string{"http://localhost:5173", "http://localhost:3000"})
+	v.SetDefault("cors.allow_methods", []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"})
+	v.SetDefault("cors.allow_headers", []string{"Origin", "Content-Type", "Authorization", "X-Request-ID"})
+	v.SetDefault("cors.expose_headers", []string{"X-Request-ID"})
+	v.SetDefault("cors.allow_credentials", true)
+	v.SetDefault("cors.max_age", "12h")
+
+	v.SetDefault("database.host", "localhost")
+	v.SetDefault("database.port", 5432)
+	v.SetDefault("database.user", "postgres")
+	v.SetDefault("database.password", "postgres")
+	v.SetDefault("database.name", "goweb_scaffold")
+	v.SetDefault("database.ssl_mode", "disable")
+	v.SetDefault("database.time_zone", "Asia/Shanghai")
+	v.SetDefault("database.max_open_conns", 20)
+	v.SetDefault("database.max_idle_conns", 10)
+	v.SetDefault("database.conn_max_lifetime", "1h")
+	v.SetDefault("database.conn_max_idle_time", "30m")
+	v.SetDefault("database.connect_timeout", "5s")
 }

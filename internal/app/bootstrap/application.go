@@ -5,9 +5,13 @@ import (
 	"fmt"
 
 	"goweb-scaffold/internal/app/lifecycle"
+	systemhttp "goweb-scaffold/internal/modules/system/interfaces/http"
 	"goweb-scaffold/internal/platform/config"
+	"goweb-scaffold/internal/platform/httpserver"
+	"goweb-scaffold/internal/platform/httpserver/middleware"
 	"goweb-scaffold/internal/platform/logger"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -28,10 +32,35 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 		return nil, fmt.Errorf("create logger: %w", err)
 	}
 
+	if cfg.App.Env == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	router := gin.New()
+	router.Use(
+		middleware.RequestID(),
+		middleware.Recovery(log),
+		middleware.AccessLog(log),
+		middleware.CORS(cfg.CORS),
+	)
+
+	systemHandler := systemhttp.NewHandler()
+	systemhttp.RegisterRoutes(router, systemHandler)
+
+	manger := lifecycle.NewManager()
+	server := httpserver.NewServer(cfg.HTTP, router)
+
+	manger.Register(
+		lifecycle.Hook{
+			Name:  "http_server",
+			Start: server.Start,
+			Stop:  server.Stop,
+		},
+	)
+
 	return &Application{
 		config:    cfg,
 		logger:    log,
-		lifecycle: lifecycle.NewManager(),
+		lifecycle: manger,
 	}, nil
 }
 
@@ -41,6 +70,7 @@ func (a *Application) Run(ctx context.Context) error {
 		"应用启动中",
 		zap.String("app_name", a.config.App.Name),
 		zap.String("app_env", a.config.App.Env),
+		zap.String("http_addr", a.config.HTTP.Addr),
 	)
 
 	if err := a.lifecycle.Start(ctx); err != nil {
