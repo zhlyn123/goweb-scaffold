@@ -7,6 +7,7 @@ import (
 	"goweb-scaffold/internal/app/lifecycle"
 	systemhttp "goweb-scaffold/internal/modules/system/interfaces/http"
 	"goweb-scaffold/internal/platform/config"
+	"goweb-scaffold/internal/platform/database"
 	"goweb-scaffold/internal/platform/httpserver"
 	"goweb-scaffold/internal/platform/httpserver/middleware"
 	"goweb-scaffold/internal/platform/logger"
@@ -19,6 +20,7 @@ import (
 type Application struct {
 	config    *config.Config
 	logger    *zap.Logger
+	db        *database.DB
 	lifecycle *lifecycle.Manager
 }
 
@@ -31,6 +33,20 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create logger: %w", err)
 	}
+
+	manger := lifecycle.NewManager()
+
+	db, err := database.New(context.Background(), cfg.Database)
+	if err != nil {
+		return nil, fmt.Errorf("create database: %w", err)
+	}
+
+	manger.Register(
+		lifecycle.Hook{
+			Name: "database",
+			Stop: db.Close,
+		},
+	)
 
 	if cfg.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
@@ -46,7 +62,6 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 	systemHandler := systemhttp.NewHandler()
 	systemhttp.RegisterRoutes(router, systemHandler)
 
-	manger := lifecycle.NewManager()
 	server := httpserver.NewServer(cfg.HTTP, router)
 
 	manger.Register(
@@ -60,6 +75,7 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 	return &Application{
 		config:    cfg,
 		logger:    log,
+		db:        db,
 		lifecycle: manger,
 	}, nil
 }

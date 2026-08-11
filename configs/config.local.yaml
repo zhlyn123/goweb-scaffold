@@ -31,3 +31,17 @@ cors:
     - "X-Request-ID"
   allow_credentials: true
   max_age: 12h
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  name: goweb_scaffold
+  ssl_mode: disable
+  time_zone: Asia/Shanghai
+  max_open_conns: 20
+  max_idle_conns: 10
+  conn_max_lifetime: 1h
+  conn_max_idle_time: 30m
+  connect_timeout: 5s
