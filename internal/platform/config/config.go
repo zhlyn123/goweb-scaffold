@@ -4,7 +4,7 @@ import "time"
 
 type Config struct {
 	App      AppConfig      `mapstructure:"app"`
-	HTTP     HTTPConfig     `mapstructure:"http`
+	HTTP     HTTPConfig     `mapstructure:"http"`
 	Log      LogConfig      `mapstructure:"log"`
 	CORS     CORSCORSConfig `mapstructure:"cors"`
 	Database DatabaseConfig `mapstructure:"database"`
