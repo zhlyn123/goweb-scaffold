@@ -18,7 +18,7 @@ func NewPasswordHasher() *PasswordHasher {
 		cost: bcrypt.DefaultCost,
 	}
 }
-
+//用作测试
 func NewPasswordHasherWithCost(cost int) *PasswordHasher {
 	return &PasswordHasher{
 		cost: cost,
