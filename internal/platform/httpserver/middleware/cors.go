@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CORS(cfg config.CORSCORSConfig) gin.HandlerFunc {
+func CORS(cfg config.CORSConfig) gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowOrigins:     cfg.AllowOrigins,
 		AllowMethods:     cfg.AllowMethods,

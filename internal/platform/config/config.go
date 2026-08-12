@@ -6,7 +6,7 @@ type Config struct {
 	App      AppConfig      `mapstructure:"app"`
 	HTTP     HTTPConfig     `mapstructure:"http"`
 	Log      LogConfig      `mapstructure:"log"`
-	CORS     CORSCORSConfig `mapstructure:"cors"`
+	CORS     CORSConfig     `mapstructure:"cors"`
 	Database DatabaseConfig `mapstructure:"database"`
 }
 
@@ -27,7 +27,7 @@ type LogConfig struct {
 	Format string `mapstructure:"format"`
 }
 
-type CORSCORSConfig struct {
+type CORSConfig struct {
 	AllowOrigins     []string      `mapstructure:"allow_origins"`
 	AllowMethods     []string      `mapstructure:"allow_methods"`
 	AllowHeaders     []string      `mapstructure:"allow_headers"`
