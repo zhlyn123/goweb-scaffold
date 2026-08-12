@@ -8,6 +8,7 @@ type Config struct {
 	Log      LogConfig      `mapstructure:"log"`
 	CORS     CORSConfig     `mapstructure:"cors"`
 	Database DatabaseConfig `mapstructure:"database"`
+	JWT      JWTConfig      `mapstructure:"jwt"`
 }
 
 type AppConfig struct {
@@ -50,4 +51,10 @@ type DatabaseConfig struct {
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
 	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
 	ConnectTimeout  time.Duration `mapstructure:"connect_timeout"`
+}
+
+type JWTConfig struct {
+	Secret         string        `mapstructure:"secret"`
+	Issuer         string        `mapstructure:"issuer"`
+	AccessTokenTTL time.Duration `mapstructure:"access_token_ttl"`
 }

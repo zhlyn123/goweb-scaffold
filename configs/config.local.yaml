@@ -45,3 +45,8 @@ database:
   conn_max_lifetime: 1h
   conn_max_idle_time: 30m
   connect_timeout: 5s
+
+jwt:
+  secret: "local-dev-secret-change-me"
+  issuer: "goweb-scaffold"
+  access_token_ttl: 2h
