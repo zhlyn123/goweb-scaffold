@@ -5,12 +5,18 @@ import (
 	"fmt"
 
 	"goweb-scaffold/internal/app/lifecycle"
+	authapp "goweb-scaffold/internal/modules/auth/application"
+	authhttp "goweb-scaffold/internal/modules/auth/interfaces/http"
 	systemhttp "goweb-scaffold/internal/modules/system/interfaces/http"
+	userpersistence "goweb-scaffold/internal/modules/user/infrastructure/persistence"
+	userhttp "goweb-scaffold/internal/modules/user/interfaces/http"
 	"goweb-scaffold/internal/platform/config"
 	"goweb-scaffold/internal/platform/database"
 	"goweb-scaffold/internal/platform/httpserver"
 	"goweb-scaffold/internal/platform/httpserver/middleware"
 	"goweb-scaffold/internal/platform/logger"
+	"goweb-scaffold/internal/platform/security"
+	"goweb-scaffold/internal/shared/idgen"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -51,6 +57,7 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 	if cfg.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
 	router := gin.New()
 	router.Use(
 		middleware.RequestID(),
@@ -61,6 +68,25 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 
 	systemHandler := systemhttp.NewHandler()
 	systemhttp.RegisterRoutes(router, systemHandler)
+
+	userRepo := userpersistence.NewGormRepository(db.Gorm())
+	passwordHasher := security.NewPasswordHasher()
+	tokenService := security.NewTokenService(&cfg.JWT)
+	idGenerator := idgen.NewUUIDGenerator()
+
+	authUsecase := authapp.NewUsecase(
+		userRepo,
+		passwordHasher,
+		tokenService,
+		idGenerator,
+	)
+
+	authHandler := authhttp.NewHandler(authUsecase)
+	authhttp.RegisterRoutes(router, authHandler)
+
+	authMiddleware := middleware.AuthRequired(tokenService)
+	userHandler := userhttp.NewHandler(userRepo)
+	userhttp.RegisterRoutes(router, userHandler, authMiddleware)
 
 	server := httpserver.NewServer(cfg.HTTP, router)
 

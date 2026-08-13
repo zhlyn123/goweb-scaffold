@@ -34,7 +34,7 @@ func NewGormRepository(db *gorm.DB) *gormRepository {
 	return &gormRepository{db: db}
 }
 
-func (r *gormRepository) Create(ctx context.Context, user *domain.User) error {
+func (r *gormRepository) CreateUser(ctx context.Context, user *domain.User) error {
 	db := transaction.DBFromContext(ctx, r.db)
 
 	model := toModel(user)
@@ -45,7 +45,7 @@ func (r *gormRepository) Create(ctx context.Context, user *domain.User) error {
 	return nil
 }
 
-func (r *gormRepository) FindByID(ctx context.Context, id string) (*domain.User, error) {
+func (r *gormRepository) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
 	db := transaction.DBFromContext(ctx, r.db)
 
 	var model userModel
@@ -54,7 +54,7 @@ func (r *gormRepository) FindByID(ctx context.Context, id string) (*domain.User,
 		First(&model).
 		Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, domain.ErrUserEmailExists
+		return nil, domain.ErrUserNotFound
 	}
 
 	if err != nil {
@@ -64,7 +64,7 @@ func (r *gormRepository) FindByID(ctx context.Context, id string) (*domain.User,
 	return toEntity(&model), nil
 }
 
-func (r *gormRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (r *gormRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
 	db := transaction.DBFromContext(ctx, r.db)
 
 	var model userModel

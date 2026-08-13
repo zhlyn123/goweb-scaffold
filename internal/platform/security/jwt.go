@@ -48,7 +48,7 @@ func (s *TokenService) IssueAccessToken(ctx context.Context, userID string) (str
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	signedToken, err := token.SignedString(s.secret)
 	if err != nil {
@@ -56,4 +56,30 @@ func (s *TokenService) IssueAccessToken(ctx context.Context, userID string) (str
 	}
 
 	return signedToken, expiresAt, nil
+}
+
+func (s *TokenService) ParseAccessToken(ctx context.Context, tokenString string) (*AccessTokenCliaims, error) {
+	claims := &AccessTokenCliaims{}
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		claims,
+		func(token *jwt.Token) (any, error) {
+			if token.Method != jwt.SigningMethodHS256 {
+				return nil, ErrTokenInvalid
+			}
+			return s.secret, nil
+		})
+
+	if err != nil {
+		return nil, fmt.Errorf("解析 access token 失败: %w", err)
+	}
+	if !token.Valid {
+		return nil, ErrTokenInvalid
+	}
+	if claims.UserID == "" {
+		return nil, ErrTokenMissingUserID
+	}
+
+	return claims, nil
+
 }
