@@ -1,5 +1,5 @@
 app:
-  name: goweb-scaffokd
+  name: goweb-scaffold
   env: local
 
 http:

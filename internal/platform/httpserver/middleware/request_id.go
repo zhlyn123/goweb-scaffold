@@ -13,7 +13,7 @@ func RequestID() gin.HandlerFunc {
 			id = requestid.New()
 		}
 
-		c.Set(requestid.ConstextKey, id)
+		c.Set(requestid.ContextKey, id)
 		c.Writer.Header().Set(requestid.HeaderName, id)
 
 		c.Next()

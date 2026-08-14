@@ -7,6 +7,10 @@
 - [架构设计文档](docs/architecture-design.md)
 - [架构约束说明](docs/architecture-rules.md)
 - [计划周期表](docs/roadmap.md)
+- [模块开发指南](docs/module-development-guide.md)
+- [配置说明](docs/configuration.md)
+- [错误码说明](docs/error-codes.md)
+- [v0.1.0 checklist](docs/v0.1.0-checklist.md)
 - [OpenAPI 文档](api/openapi/openapi.yaml)
 
 ## 当前能力
@@ -37,11 +41,13 @@ docker compose up --build
 
 - API: http://localhost:8080
 - 健康检查: http://localhost:8080/health/live
+- Ready 检查: http://localhost:8080/health/ready
+- Metrics: http://localhost:8080/metrics
 - OpenAPI YAML: http://localhost:8080/openapi.yaml
 - Swagger UI: http://localhost:8081
 - Prometheus: http://localhost:9090
 
-Compose 会启动 PostgreSQL、Redis、迁移任务、API 服务、Prometheus 和 Swagger UI。
+Compose 会启动 PostgreSQL、Redis、migration 任务、API 服务、Prometheus 和 Swagger UI。
 
 ## 本地开发
 
@@ -72,6 +78,7 @@ make tidy
 make test
 make docker-up
 make docker-down
+make openapi
 ```
 
 ## 测试
@@ -82,7 +89,7 @@ make docker-down
 make test
 ```
 
-运行 Repository 集成测试需要显式提供测试数据库 DSN：
+运行 repository 集成测试需要显式提供测试数据库 DSN：
 
 ```bash
 make test-integration TEST_DATABASE_DSN="host=localhost port=5432 user=postgres password=postgres dbname=goweb_scaffold sslmode=disable TimeZone=Asia/Shanghai"
@@ -147,4 +154,4 @@ security:
     window: 1m
 ```
 
-生产环境中，如果 `cors.allow_credentials` 为 `true`，则不允许 `cors.allow_origins` 使用 `*`。
+生产环境中，如果 `cors.allow_credentials` 为 `true`，则不允许 `cors.allow_origins` 使用 `*`。更多说明见 [配置说明](docs/configuration.md)。

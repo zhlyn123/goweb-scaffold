@@ -32,7 +32,7 @@ func Error(c *gin.Context, status int, code string, message string) {
 }
 
 func getRequestID(c *gin.Context) string {
-	value, exists := c.Get(requestid.ConstextKey)
+	value, exists := c.Get(requestid.ContextKey)
 	if !exists {
 		return ""
 	}

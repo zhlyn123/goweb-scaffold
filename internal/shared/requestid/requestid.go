@@ -7,7 +7,8 @@ import (
 
 const (
 	HeaderName  = "X-Request-ID"
-	ConstextKey = "request_id"
+	ContextKey  = "request_id"
+	ConstextKey = ContextKey
 )
 
 func New() string {
