@@ -11,7 +11,7 @@ import (
 
 type PasswordHasher interface {
 	HashPassword(plainPassword string) (string, error)
-	CheckPassword(plainPassword string, passwrodHash string) error
+	CheckPassword(plainPassword string, passwordHash string) error
 }
 
 type TokenIssuer interface {
@@ -22,11 +22,28 @@ type IDGenerator interface {
 	NewID() string
 }
 
+type TransactionManager interface {
+	Run(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type RoleBinder interface {
+	BindRoleToUser(ctx context.Context, userID string, roleCode string) error
+}
+
+type RoleBinderFunc func(ctx context.Context, userID string, roleCode string) error
+
+func (f RoleBinderFunc) BindRoleToUser(ctx context.Context, userID string, roleCode string) error {
+	return f(ctx, userID, roleCode)
+}
+
 type Usecase struct {
-	userRepo     userdomain.Repository
-	passwordHash PasswordHasher
-	tokenIssuer  TokenIssuer
-	idGenerator  IDGenerator
+	userRepo        userdomain.Repository
+	passwordHash    PasswordHasher
+	tokenIssuer     TokenIssuer
+	idGenerator     IDGenerator
+	txManager       TransactionManager
+	roleBinder      RoleBinder
+	defaultRoleCode string
 }
 
 func NewUsecase(
@@ -34,12 +51,18 @@ func NewUsecase(
 	passwordHash PasswordHasher,
 	tokenIssuer TokenIssuer,
 	idGenerator IDGenerator,
+	txManager TransactionManager,
+	roleBinder RoleBinder,
+	defaultRoleCode string,
 ) *Usecase {
 	return &Usecase{
-		userRepo:     userRepo,
-		passwordHash: passwordHash,
-		tokenIssuer:  tokenIssuer,
-		idGenerator:  idGenerator,
+		userRepo:        userRepo,
+		passwordHash:    passwordHash,
+		tokenIssuer:     tokenIssuer,
+		idGenerator:     idGenerator,
+		txManager:       txManager,
+		roleBinder:      roleBinder,
+		defaultRoleCode: defaultRoleCode,
 	}
 }
 
@@ -70,7 +93,6 @@ func (u *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*RegisterR
 	}
 
 	now := time.Now()
-
 	user := &userdomain.User{
 		ID:           u.idGenerator.NewID(),
 		Email:        cmd.Email,
@@ -81,8 +103,26 @@ func (u *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*RegisterR
 		UpdatedAt:    now,
 	}
 
-	if err := u.userRepo.CreateUser(ctx, user); err != nil {
-		return nil, fmt.Errorf("创建用户失败: %w", err)
+	createUser := func(ctx context.Context) error {
+		if err := u.userRepo.CreateUser(ctx, user); err != nil {
+			return fmt.Errorf("创建用户失败: %w", err)
+		}
+
+		if u.roleBinder != nil && u.defaultRoleCode != "" {
+			if err := u.roleBinder.BindRoleToUser(ctx, user.ID, u.defaultRoleCode); err != nil {
+				return fmt.Errorf("绑定默认用户角色失败: %w", err)
+			}
+		}
+
+		return nil
+	}
+
+	if u.txManager != nil {
+		if err := u.txManager.Run(ctx, createUser); err != nil {
+			return nil, err
+		}
+	} else if err := createUser(ctx); err != nil {
+		return nil, err
 	}
 
 	return &RegisterResult{

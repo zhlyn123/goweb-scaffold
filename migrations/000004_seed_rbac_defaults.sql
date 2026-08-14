@@ -1,0 +1,46 @@
+-- +goose Up
+-- 初始化基础角色。
+INSERT INTO roles (id, code, name, description)
+VALUES
+    ('10000000-0000-0000-0000-000000000001', 'admin', '管理员', '系统管理员角色'),
+    ('10000000-0000-0000-0000-000000000002', 'user', '普通用户', '默认普通用户角色')
+ON CONFLICT DO NOTHING;
+
+-- 初始化基础权限。
+INSERT INTO permissions (id, code, name, description)
+VALUES
+    ('20000000-0000-0000-0000-000000000001', 'user:read', '读取用户信息', '允许读取用户基础信息'),
+    ('20000000-0000-0000-0000-000000000002', 'user:manage', '管理用户', '允许管理用户')
+ON CONFLICT DO NOTHING;
+
+-- 普通用户默认拥有读取自己用户信息的权限。
+INSERT INTO role_permissions (role_id, permission_id)
+VALUES
+    ('10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001')
+ON CONFLICT DO NOTHING;
+
+-- 管理员拥有用户读取和管理权限。
+INSERT INTO role_permissions (role_id, permission_id)
+VALUES
+    ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001'),
+    ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002')
+ON CONFLICT DO NOTHING;
+
+-- +goose Down
+DELETE FROM role_permissions
+WHERE role_id IN (
+    '10000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000002'
+);
+
+DELETE FROM permissions
+WHERE id IN (
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000002'
+);
+
+DELETE FROM roles
+WHERE id IN (
+    '10000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000002'
+);

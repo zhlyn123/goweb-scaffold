@@ -32,6 +32,13 @@ cors:
   allow_credentials: true
   max_age: 12h
 
+security:
+  max_body_bytes: 1048576
+  login_rate_limit:
+    enabled: true
+    requests: 5
+    window: 1m
+
 database:
   host: localhost
   port: 5432
@@ -45,6 +52,23 @@ database:
   conn_max_lifetime: 1h
   conn_max_idle_time: 30m
   connect_timeout: 5s
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
+
+metrics:
+  enabled: true
+  path: /metrics
+
+telemetry:
+  enabled: true
+  service_name: goweb-scaffold
+  exporter: stdout
 
 jwt:
   secret: "local-dev-secret-change-me"

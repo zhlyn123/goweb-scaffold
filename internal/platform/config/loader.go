@@ -54,6 +54,11 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("cors.allow_credentials", true)
 	v.SetDefault("cors.max_age", "12h")
 
+	v.SetDefault("security.max_body_bytes", 1048576)
+	v.SetDefault("security.login_rate_limit.enabled", true)
+	v.SetDefault("security.login_rate_limit.requests", 5)
+	v.SetDefault("security.login_rate_limit.window", "1m")
+
 	v.SetDefault("database.host", "localhost")
 	v.SetDefault("database.port", 5432)
 	v.SetDefault("database.user", "postgres")
@@ -66,4 +71,18 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("database.conn_max_lifetime", "1h")
 	v.SetDefault("database.conn_max_idle_time", "30m")
 	v.SetDefault("database.connect_timeout", "5s")
+
+	v.SetDefault("redis.addr", "localhost:6379")
+	v.SetDefault("redis.password", "")
+	v.SetDefault("redis.db", 0)
+	v.SetDefault("redis.dial_timeout", "5s")
+	v.SetDefault("redis.read_timeout", "3s")
+	v.SetDefault("redis.write_timeout", "3s")
+
+	v.SetDefault("metrics.enabled", true)
+	v.SetDefault("metrics.path", "/metrics")
+
+	v.SetDefault("telemetry.enabled", true)
+	v.SetDefault("telemetry.service_name", "goweb-scaffold")
+	v.SetDefault("telemetry.exporter", "stdout")
 }

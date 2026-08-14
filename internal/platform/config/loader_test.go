@@ -35,6 +35,12 @@ cors:
     - "X-Request-ID"
   allow_credentials: true
   max_age: 1h
+security:
+  max_body_bytes: 2048
+  login_rate_limit:
+    enabled: true
+    requests: 3
+    window: 30s
 database:
   host: db.example.local
   port: 5433
@@ -75,6 +81,18 @@ database:
 
 	if cfg.CORS.MaxAge.String() != "1h0m0s" {
 		t.Fatalf("CORS.MaxAge = %s, want 1h0m0s", cfg.CORS.MaxAge)
+	}
+
+	if cfg.Security.MaxBodyBytes != 2048 {
+		t.Fatalf("Security.MaxBodyBytes = %d, want 2048", cfg.Security.MaxBodyBytes)
+	}
+
+	if cfg.Security.LoginRateLimit.Requests != 3 {
+		t.Fatalf("Security.LoginRateLimit.Requests = %d, want 3", cfg.Security.LoginRateLimit.Requests)
+	}
+
+	if cfg.Security.LoginRateLimit.Window.String() != "30s" {
+		t.Fatalf("Security.LoginRateLimit.Window = %s, want 30s", cfg.Security.LoginRateLimit.Window)
 	}
 
 	if cfg.Database.Host != "db.example.local" {

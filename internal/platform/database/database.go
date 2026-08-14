@@ -13,6 +13,7 @@ type DB struct {
 	gormDB *gorm.DB
 	sqlDB  interface {
 		Close() error
+		PingContext(context.Context) error
 	}
 }
 
@@ -47,6 +48,18 @@ func New(ctx context.Context, cfg config.DatabaseConfig) (*DB, error) {
 
 func (d *DB) Gorm() *gorm.DB {
 	return d.gormDB
+}
+
+func (d *DB) Ping(ctx context.Context) error {
+	if d == nil || d.sqlDB == nil {
+		return fmt.Errorf("database is not initialized")
+	}
+
+	if err := d.sqlDB.PingContext(ctx); err != nil {
+		return fmt.Errorf("ping database: %w", err)
+	}
+
+	return nil
 }
 
 func (d *DB) Close(context.Context) error {
