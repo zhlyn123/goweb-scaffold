@@ -1,0 +1,77 @@
+app:
+  name: goweb-scaffold
+  env: local
+
+http:
+  addr: ":8080"
+  read_timeout: 5s
+  write_timeout: 10s
+  shutdown_timeout: 10s
+
+log:
+  level: debug
+  format: console
+
+cors:
+  allow_origins:
+    - "http://localhost:5173"
+    - "http://localhost:8080"
+    - "http://localhost:8081"
+  allow_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allow_headers:
+    - "Origin"
+    - "Content-Type"
+    - "Authorization"
+    - "X-Request-ID"
+  expose_headers:
+    - "X-Request-ID"
+  allow_credentials: true
+  max_age: 12h
+
+security:
+  max_body_bytes: 1048576
+  login_rate_limit:
+    enabled: true
+    requests: 5
+    window: 1m
+
+database:
+  host: postgres
+  port: 5432
+  user: postgres
+  password: postgres
+  name: goweb_scaffold
+  ssl_mode: disable
+  time_zone: Asia/Shanghai
+  max_open_conns: 20
+  max_idle_conns: 10
+  conn_max_lifetime: 1h
+  conn_max_idle_time: 30m
+  connect_timeout: 5s
+
+redis:
+  addr: redis:6379
+  password: ""
+  db: 0
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
+
+metrics:
+  enabled: true
+  path: /metrics
+
+telemetry:
+  enabled: true
+  service_name: goweb-scaffold
+  exporter: stdout
+
+jwt:
+  secret: "local-dev-secret-change-me"
+  issuer: "goweb-scaffold"
+  access_token_ttl: 2h

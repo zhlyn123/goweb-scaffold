@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: goweb_scaffold
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d goweb_scaffold"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+    entrypoint: ["/app/migrate"]
+    command: ["-config", "configs/config.docker.yaml", "up"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health/live >/dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus.local.yaml:/etc/prometheus/prometheus.yml:ro
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v5.28.1
+    depends_on:
+      app:
+        condition: service_started
+    environment:
+      SWAGGER_JSON_URL: http://localhost:8080/openapi.yaml
+    ports:
+      - "8081:8080"
+
+volumes:
+  postgres_data:

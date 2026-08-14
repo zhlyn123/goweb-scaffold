@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"goweb-scaffold/internal/app/lifecycle"
 	authapp "goweb-scaffold/internal/modules/auth/application"
@@ -88,6 +89,7 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 		router.Use(metricSet.Middleware())
 		router.GET(cfg.Metrics.Path, gin.WrapH(metricSet.Handler()))
 	}
+	registerOpenAPI(router)
 
 	systemHandler := systemhttp.NewHandler(db, redisClient)
 	systemhttp.RegisterRoutes(router, systemHandler)
@@ -143,6 +145,18 @@ func NewApplication(cfg *config.Config) (*Application, error) {
 		redis:     redisClient,
 		lifecycle: manager,
 	}, nil
+}
+
+func registerOpenAPI(router *gin.Engine) {
+	for _, path := range []string{
+		"api/openapi/openapi.yaml",
+		"api-docs/openapi/openapi.yaml",
+	} {
+		if _, err := os.Stat(path); err == nil {
+			router.StaticFile("/openapi.yaml", path)
+			return
+		}
+	}
 }
 
 func (a *Application) Run(ctx context.Context) error {
